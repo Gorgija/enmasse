@@ -46,14 +46,17 @@ public class LinkInitiator implements EventHandler {
    }
 
    @Override
-   public void onAuthFailed(final ProtonHandler protonHandler, final Connection connection)
-   {
+   public void onAuthFailed(final ProtonHandler protonHandler, final Connection connection) {
       
    }
 
    @Override
-   public void onSaslMechanismsOffered(final ProtonHandler handler, final String[] mechanisms)
-   {
+   public void onAuthSuccess(final ProtonHandler protonHandler, final Connection connection) {
+
+   }
+
+   @Override
+   public void onSaslMechanismsOffered(final ProtonHandler handler, final String[] mechanisms) {
 
    }
 
