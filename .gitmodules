@@ -1,3 +1,11 @@
 [submodule "templates/jsonnet"]
 	path = templates/jsonnet
 	url = https://github.com/google/jsonnet.git
+[submodule "artemis/activemq-artemis"]
+	path = artemis/activemq-artemis
+	url = https://github.com/rgodfrey/activemq-artemis.git
+	branch = amqp-connector-sasl-2.2.0
+[submodule "artemis/artemis-amqp-connector/artemis/activemq-artemis"]
+	path = artemis/artemis-amqp-connector/artemis/activemq-artemis
+	url = https://github.com/rgodfrey/activemq-artemis.git
+	branch = amqp-connector-sasl-2.2.0
