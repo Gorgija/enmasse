@@ -15,27 +15,36 @@ fi
 echo "Building EnMasse"
 make
 
-echo "Tagging Docker Images"
-make docker_tag
-
-if [ "$TRAVIS_BRANCH" != "master" ] || [ "$TRAVIS_PULL_REQUEST" != "false" ]
-then
-    echo "Logging into to local docker registry"
-    oc login -u test -p test --insecure-skip-tls-verify=true https://localhost:8443
-    oc new-project enmasseci
-
-    docker login -u enmasseci -p `oc whoami -t` 172.30.1.1:5000
-else
-    make UPLOAD_TAG=latest docker_tag
-    echo "Logging in to Docker Hub"
-    docker login -u $DOCKER_USER -p $DOCKER_PASS
-fi
-
-echo "Pushing images to Docker Registry"
-make docker_push
-
-echo "Running systemtests"
-./systemtests/scripts/run_test_component.sh templates/install /tmp/openshift systemtests
-
-echo "Generating bintray artifact descriptor"
-./.travis/generate-bintray-descriptor.sh enmasse templates/build/enmasse-${VERSION}.tgz > .bintray.json
+#echo "Tagging Docker Images"
+#make docker_tag
+#
+#if [ "$TRAVIS_BRANCH" != "master" ] || [ "$TRAVIS_PULL_REQUEST" != "false" ]
+#then
+#    echo "Logging into to local docker registry"
+#    oc login -u test -p test --insecure-skip-tls-verify=true https://localhost:8443
+#    oc new-project enmasseci
+#
+#    docker login -u enmasseci -p `oc whoami -t` 172.30.1.1:5000
+#else
+#    make UPLOAD_TAG=latest docker_tag
+#    echo "Logging in to Docker Hub"
+#    docker login -u $DOCKER_USER -p $DOCKER_PASS
+#fi
+#
+#echo "Pushing images to Docker Registry"
+#make docker_push
+#
+#echo "Running systemtests"
+#./systemtests/scripts/run_test_component.sh templates/install /tmp/openshift systemtests
+#
+#echo "Collecting test reports"
+#
+#mkdir -p target/surefire-reports
+#for i in `find . -name "TEST-*.xml"`
+#do
+#    cp $i target/surefire-reports
+#done
+#mvn surefire-report:report-only
+#
+#echo "Generating bintray artifact descriptor"
+#./.travis/upload-artifacts.sh

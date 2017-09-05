@@ -1,23 +1,17 @@
 #!/bin/bash
-
-# Assumes that BINTRAY_API_USER and BINTRAY_API_KEY to be set
-PACKAGE=$1
-shift
-FILES=$@
-
-TAG="latest"
-REPOSITORY="snapshots"
-
-if [ -n "$TRAVIS_TAG" ]
-then
-    TAG="$TRAVIS_TAG"
-    REPOSITORY="releases"
+VERSION=${TRAVIS_TAG:-latest}
+if [ "$VERSION" != "latest" ]; then
+    TAG=$VERSION
 fi
 
-if [ "$TRAVIS_BRANCH" == "master" ] || [ -n "$TRAVIS_TAG" ]
+PACKAGE=enmasse
+REPOSITORY="snapshots"
+if [ -n "$TRAVIS_TAG" ]
 then
-    if [ "$TRAVIS_PULL_REQUEST" == "false" ]
-    then
+    REPOSITORY="releases"
+    TRAVIS_BUILD_NUMBER="."
+fi
+
 cat<<EOF
 {
     "package": {
@@ -39,23 +33,10 @@ cat<<EOF
     },
 
     "files": [
-EOF
-    n=0
-    COMMA=""
-    for file in $FILES
-    do
-        base=`basename $file`
-        if [ $n -gt 0 ]; then
-            COMMA=","
-        fi
-        echo "       $COMMA{\"includePattern\": \"$file\", \"uploadPattern\": \"${TAG}/$base\", \"matrixParams\": {\"override\": 1}}"
-        n=$(($n + 1))
-    done
-cat<<EOF
+            {"includePattern": "target/surefire-reports/(.*)", "uploadPattern":"$TRAVIS_BUILD_NUMBER/test-reports/\$1", "matrixParams": {"override": 1}},
+            {"includePattern": "target/site/(surefire-report.html)", "uploadPattern":"$TRAVIS_BUILD_NUMBER/test-reports/\$1", "matrixParams": {"override": 1}},
+            {"includePattern": "templates/build/(enmasse-${VERSION}.tgz)", "uploadPattern":"$TRAVIS_BUILD_NUMBER/\$1", "matrixParams": {"override": 1}}
     ],
     "publish": true
 }
 EOF
-    fi
-fi
-
