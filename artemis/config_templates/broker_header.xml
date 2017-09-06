@@ -100,8 +100,6 @@ under the License.
          <acceptor name="amqp">tcp://0.0.0.0:5673?protocols=AMQP;sslEnabled=true;keyStorePath=${KEYSTORE_PATH};keyStorePassword=enmasse;trustStorePath=${TRUSTSTORE_PATH};trustStorePassword=enmasse;verifyHost=false;needClientAuth=true</acceptor>
       </acceptors>
 
-      <security-enabled>false</security-enabled>
-
       <security-settings>
          <security-setting match="#">
             <permission type="createNonDurableQueue" roles="admin"/>
@@ -126,6 +124,6 @@ under the License.
             <!-- with -1 only the global-max-size is in use for limiting -->
             <max-size-bytes>52428800</max-size-bytes>
             <message-counter-history-day-limit>10</message-counter-history-day-limit>
-            <address-full-policy>BLOCK</address-full-policy>
+            <address-full-policy>FAIL</address-full-policy>
          </address-setting>
       </address-settings>
