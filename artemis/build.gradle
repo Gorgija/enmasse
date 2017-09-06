@@ -13,7 +13,7 @@ task fetchDependencies(type: Download) {
     dest new File(buildDir, 'apache-artemis-bin.tar.gz')
 }
 
-task buildArtemis {
+task buildArtemisAmqpModule {
   doLast {
     exec {
       workingDir 'activemq-artemis/artemis-protocols/artemis-amqp-protocol'
@@ -50,8 +50,6 @@ task buildTar(type: Tar) {
     archiveName 'artemis-image.tar'
     destinationDir file('build')
 }
-
-build.dependsOn buildArtemis
 
 task pack {
     dependsOn buildTar
