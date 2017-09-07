@@ -64,8 +64,7 @@ public abstract class TestBase {
      * @throws Exception
      */
     protected void deleteAddresses(Destination... destinations) throws Exception {
-        TimeoutBudget budget = new TimeoutBudget(5, TimeUnit.MINUTES);
-        TestUtils.deploy(addressApiClient, openShift, budget, getInstanceName().toLowerCase(), HttpMethod.DELETE, destinations);
+        TestUtils.delete(addressApiClient, getInstanceName().toLowerCase(), destinations);
     }
 
     /**

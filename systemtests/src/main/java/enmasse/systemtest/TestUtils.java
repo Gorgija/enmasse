@@ -120,6 +120,10 @@ public class TestUtils {
         }
     }
 
+    public static void delete(AddressApiClient apiClient, String instanceName, Destination... destinations) throws Exception {
+        apiClient.deleteAddresses(instanceName, destinations);
+    }
+
     public static void deploy(AddressApiClient apiClient, OpenShift openShift, TimeoutBudget budget, String instanceName, HttpMethod httpMethod, Destination... destinations) throws Exception {
         apiClient.deploy(instanceName, httpMethod, destinations);
         Set<String> groups = new HashSet<>();
@@ -137,13 +141,6 @@ public class TestUtils {
         waitForExpectedPods(openShift, expectedPods, budget);
     }
 
-    /**
-     * @param apiClient
-     * @param instanceName
-     * @param addressName
-     * @return
-     * @throws Exception
-     */
     public static Future<List<String>> getAddresses(AddressApiClient apiClient, String instanceName, Optional<String> addressName) throws Exception {
         JsonObject response = apiClient.getAddresses(instanceName, addressName);
         CompletableFuture<List<String>> listOfAddresses = new CompletableFuture<>();
@@ -166,9 +163,11 @@ public class TestUtils {
                 break;
             case "AddressList":
                 JsonArray items = htmlResponse.getJsonArray("items");
-                items.forEach(address -> {
-                    addresses.add(((JsonObject) address).getJsonObject("metadata").getString("name"));
-                });
+                if (items != null) {
+                    items.forEach(address -> {
+                        addresses.add(((JsonObject) address).getJsonObject("metadata").getString("name"));
+                    });
+                }
                 break;
             default:
                 Logging.log.warn("Unspecified kind: " + kind);

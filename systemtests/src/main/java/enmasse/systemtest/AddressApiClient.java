@@ -100,11 +100,51 @@ public class AddressApiClient {
     }
 
     /**
+     * delete addresses via reset api
+     *
+     * @param instanceName name of instance
+     * @param destinations variable count of destinations that you can delete
+     * @throws Exception
+     */
+    public void deleteAddresses(String instanceName, Destination... destinations) throws Exception {
+        if (isMultitenant) {
+            doDelete("/v1/addresses/" + instanceName + "/");
+        } else {
+            for (Destination destination : destinations) {
+                doDelete("/v1/addresses/default/" + destination.getAddress());
+            }
+        }
+    }
+
+    private void doDelete(String path) throws Exception {
+        CountDownLatch latch = new CountDownLatch(2);
+        HttpClientRequest request = httpClient.request(HttpMethod.DELETE, endpoint.getPort(), endpoint.getHost(), path);
+        request.setTimeout(10_000);
+        request.exceptionHandler(event -> {
+            Logging.log.warn("Exception while performing request", event.getCause());
+        });
+        request.handler(event -> {
+            event.bodyHandler(responseData -> {
+                latch.countDown();
+            });
+            if (event.statusCode() >= 200 && event.statusCode() < 300) {
+                latch.countDown();
+            } else {
+                Logging.log.warn("Error during deleting addresses: " + event.statusCode() + ": " + event.statusMessage());
+            }
+        });
+        request.end();
+        if (!latch.await(30, TimeUnit.SECONDS)) {
+            throw new RuntimeException("Timeout deleting addresses");
+        }
+    }
+
+    /**
      * deploying addresses via rest api
      *
      * @param instanceName name of instance
-     * @param httpMethod   PUT, POST and DELETE method are supported
-     * @param destinations variable count of destinations that you can put, append or delete
+     * @param httpMethod   PUT and POST method are supported
+     * @param destinations variable count of destinations that you can put or append
      * @throws Exception
      */
     public void deploy(String instanceName, HttpMethod httpMethod, Destination... destinations) throws Exception {

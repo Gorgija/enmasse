@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertNotNull;
@@ -52,7 +53,6 @@ public class QueueTest extends AmqpTestBase {
         runQueueTest(client, q3);
     }
 
-    
     public void testRestApiForQueue() throws Exception {
         List<String> queues = Arrays.asList("queue1", "queue2");
         Destination q1 = Destination.queue(queues.get(0), Optional.of("pooled-inmemory"));
@@ -61,22 +61,24 @@ public class QueueTest extends AmqpTestBase {
         setAddresses(q1);
         appendAddresses(q2);
 
-        Future<List<String>> response = getAddresses(Optional.empty());
-
         //queue1, queue2
-        assertThat(response.get(30, TimeUnit.SECONDS), is(queues));
+        Future<List<String>> response = getAddresses(Optional.empty());
+        assertThat(response.get(1, TimeUnit.MINUTES), is(queues));
+        Logging.log.info("queues (" + queues.stream().collect(Collectors.joining(",")) + ") successfully created");
 
         deleteAddresses(q1);
-        response = getAddresses(Optional.empty());
 
         //queue1
-        assertThat(response.get(30, TimeUnit.SECONDS), is(queues.subList(0, 1)));
+        response = getAddresses(Optional.empty());
+        assertThat(response.get(1, TimeUnit.MINUTES), is(queues.subList(1, 2)));
+        Logging.log.info("queue (" + q1.getAddress() + ") successfully deleted");
 
         deleteAddresses(q2);
-        response = getAddresses(Optional.empty());
 
         //empty
-        assertThat(response.get(30, TimeUnit.SECONDS), is(java.util.Collections.emptyList()));
+        response = getAddresses(Optional.empty());
+        assertThat(response.get(1, TimeUnit.MINUTES), is(java.util.Collections.emptyList()));
+        Logging.log.info("queue (" + q2.getAddress() + ") successfully deleted");
     }
 
     public void testScaledown() throws Exception {
