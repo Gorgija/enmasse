@@ -45,6 +45,7 @@ function configure() {
     
         envsubst < /tmp/broker.xml > $instanceDir/etc/broker.xml
         cp $CONFIG_TEMPLATES/bootstrap.xml $instanceDir/etc/bootstrap.xml
+        cp $CONFIG_TEMPLATES/logging.properties $instanceDir/etc/logging.properties
 
         # Convert certs
         openssl pkcs12 -export -passout pass:enmasse -in /etc/enmasse-certs/tls.crt -inkey /etc/enmasse-certs/tls.key -chain -CAfile /etc/enmasse-certs/ca.crt -name "io.enmasse" -out /tmp/enmasse-keystore.p12
