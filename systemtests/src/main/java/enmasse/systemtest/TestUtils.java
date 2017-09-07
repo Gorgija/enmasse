@@ -21,12 +21,17 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.enmasse.amqp.SyncRequestClient;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import org.apache.qpid.proton.amqp.messaging.AmqpValue;
 import org.apache.qpid.proton.message.Message;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -115,8 +120,8 @@ public class TestUtils {
         }
     }
 
-    public static void deploy(AddressApiClient apiClient, OpenShift openShift, TimeoutBudget budget, String instanceName, Destination ... destinations) throws Exception {
-        apiClient.deploy(instanceName, destinations);
+    public static void deploy(AddressApiClient apiClient, OpenShift openShift, TimeoutBudget budget, String instanceName, HttpMethod httpMethod, Destination... destinations) throws Exception {
+        apiClient.deploy(instanceName, httpMethod, destinations);
         Set<String> groups = new HashSet<>();
         for (Destination destination : destinations) {
             if (Destination.isQueue(destination) || Destination.isTopic(destination)) {
@@ -130,6 +135,45 @@ public class TestUtils {
         int expectedPods = openShift.getExpectedPods() + groups.size();
         Logging.log.info("Waiting for " + expectedPods + " pods");
         waitForExpectedPods(openShift, expectedPods, budget);
+    }
+
+    /**
+     * @param apiClient
+     * @param instanceName
+     * @param addressName
+     * @return
+     * @throws Exception
+     */
+    public static Future<List<String>> getAddresses(AddressApiClient apiClient, String instanceName, Optional<String> addressName) throws Exception {
+        JsonObject response = apiClient.getAddresses(instanceName, addressName);
+        CompletableFuture<List<String>> listOfAddresses = new CompletableFuture<>();
+        listOfAddresses.complete(convertToList(response));
+        return listOfAddresses;
+    }
+
+    /**
+     * Pulling out names of queues from json object
+     *
+     * @param htmlResponse JsonObject with specified structure returned from rest api
+     * @return list of address names
+     */
+    private static List<String> convertToList(JsonObject htmlResponse) {
+        String kind = htmlResponse.getString("kind");
+        List<String> addresses = new ArrayList<>();
+        switch (kind) {
+            case "Address":
+                addresses.add(htmlResponse.getJsonObject("metadata").getString("name"));
+                break;
+            case "AddressList":
+                JsonArray items = htmlResponse.getJsonArray("items");
+                items.forEach(address -> {
+                    addresses.add(((JsonObject) address).getJsonObject("metadata").getString("name"));
+                });
+                break;
+            default:
+                Logging.log.warn("Unspecified kind: " + kind);
+        }
+        return addresses;
     }
 
     public static void waitForAddress(OpenShift openShift, String address, TimeoutBudget budget) throws Exception {

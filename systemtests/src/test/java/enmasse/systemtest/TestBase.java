@@ -16,10 +16,14 @@
 
 package enmasse.systemtest;
 
+import io.vertx.core.http.HttpMethod;
 import org.junit.After;
 import org.junit.Before;
 
 import java.io.File;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -47,14 +51,54 @@ public abstract class TestBase {
 
     @After
     public void teardown() throws Exception {
-        deploy();
+        setAddresses();
         addressApiClient.close();
         logCollector.close();
     }
 
-    protected void deploy(Destination ... destinations) throws Exception {
+
+    /**
+     * use DELETE html method for delete specific addresses
+     *
+     * @param destinations
+     * @throws Exception
+     */
+    protected void deleteAddresses(Destination... destinations) throws Exception {
         TimeoutBudget budget = new TimeoutBudget(5, TimeUnit.MINUTES);
-        TestUtils.deploy(addressApiClient, openShift, budget, getInstanceName().toLowerCase(), destinations);
+        TestUtils.deploy(addressApiClient, openShift, budget, getInstanceName().toLowerCase(), HttpMethod.DELETE, destinations);
+    }
+
+    /**
+     * use POST html method to append addresses to already existing addresses
+     *
+     * @param destinations
+     * @throws Exception
+     */
+    protected void appendAddresses(Destination... destinations) throws Exception {
+        TimeoutBudget budget = new TimeoutBudget(5, TimeUnit.MINUTES);
+        TestUtils.deploy(addressApiClient, openShift, budget, getInstanceName().toLowerCase(), HttpMethod.POST, destinations);
+    }
+
+    /**
+     * use PUT html method to replace all addresses
+     *
+     * @param destinations
+     * @throws Exception
+     */
+    protected void setAddresses(Destination... destinations) throws Exception {
+        TimeoutBudget budget = new TimeoutBudget(5, TimeUnit.MINUTES);
+        TestUtils.deploy(addressApiClient, openShift, budget, getInstanceName().toLowerCase(), HttpMethod.PUT, destinations);
+    }
+
+    /**
+     * give you a list of all deployed addresses (or single deployed address)
+     *
+     * @param addressName name of single address
+     * @return list of addresses
+     * @throws Exception
+     */
+    protected Future<List<String>> getAddresses(Optional<String> addressName) throws Exception {
+        return TestUtils.getAddresses(addressApiClient, getInstanceName().toLowerCase(), addressName);
     }
 
     protected void scale(Destination destination, int numReplicas) throws Exception {

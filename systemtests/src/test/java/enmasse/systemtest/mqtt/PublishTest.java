@@ -17,6 +17,7 @@
 package enmasse.systemtest.mqtt;
 
 import enmasse.systemtest.Destination;
+import io.vertx.core.http.HttpMethod;
 import org.junit.Test;
 import org.junit.Ignore;
 
@@ -68,7 +69,7 @@ public class PublishTest extends MqttTestBase {
     private void publish(List<String> messages, List<Integer> publisherQos, int subscriberQos) throws Exception {
 
         Destination dest = Destination.topic("mytopic");
-        deploy(dest);
+        setAddresses(dest);
         Thread.sleep(60_000);
 
         MqttClient client = this.createClient();

@@ -17,6 +17,7 @@
 package enmasse.systemtest;
 
 import enmasse.systemtest.amqp.AmqpClient;
+import io.vertx.core.http.HttpMethod;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -33,7 +34,7 @@ public class BroadcastTest extends AmqpTestBase {
     @Test
     public void testMultipleRecievers() throws Exception {
         Destination dest = Destination.multicast("broadcast");
-        deploy(dest);
+        setAddresses(dest);
         Thread.sleep(20_000);
         AmqpClient client = createBroadcastClient();
         List<String> msgs = Arrays.asList("foo");

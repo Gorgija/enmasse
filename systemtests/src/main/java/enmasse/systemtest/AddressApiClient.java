@@ -7,7 +7,10 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonObject;
 
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -55,7 +58,56 @@ public class AddressApiClient {
         }
     }
 
-    public void deploy(String instanceName, Destination ... destinations) throws Exception {
+
+    /**
+     * give you JsonObject with AddressesList or Address kind
+     *
+     * @param instanceName name of instance, this is used only if isMultitenant is set to true
+     * @param addressName  name of address
+     * @return
+     * @throws Exception
+     */
+    public JsonObject getAddresses(String instanceName, Optional<String> addressName) throws Exception {
+        HttpClientRequest request;
+        String path = isMultitenant ? "/v1/addresses/" + instanceName + "/" : "/v1/addresses/default/";
+        path += addressName.isPresent() ? addressName.get() : "";
+
+        CountDownLatch latch = new CountDownLatch(2);
+
+        request = httpClient.request(HttpMethod.GET, endpoint.getPort(), endpoint.getHost(), path);
+        request.setTimeout(10_000);
+        request.exceptionHandler(event -> {
+            Logging.log.warn("Exception while performing request", event.getCause());
+        });
+
+        final JsonObject[] responseArray = new JsonObject[1];
+        request.handler(event -> {
+            event.bodyHandler(responseData -> {
+                responseArray[0] = responseData.toJsonObject();
+                latch.countDown();
+            });
+            if (event.statusCode() >= 200 && event.statusCode() < 300) {
+                latch.countDown();
+            } else {
+                Logging.log.warn("Error when getting addresses: " + event.statusCode() + ": " + event.statusMessage());
+            }
+        });
+        request.end();
+        if (!latch.await(30, TimeUnit.SECONDS)) {
+            throw new RuntimeException("Timeout getting address config");
+        }
+        return responseArray[0];
+    }
+
+    /**
+     * deploying addresses via rest api
+     *
+     * @param instanceName name of instance
+     * @param httpMethod   PUT, POST and DELETE method are supported
+     * @param destinations variable count of destinations that you can put, append or delete
+     * @throws Exception
+     */
+    public void deploy(String instanceName, HttpMethod httpMethod, Destination... destinations) throws Exception {
         ObjectNode config = mapper.createObjectNode();
         config.put("apiVersion", "v1");
         config.put("kind", "AddressList");
@@ -73,9 +125,9 @@ public class AddressApiClient {
         CountDownLatch latch = new CountDownLatch(1);
         HttpClientRequest request;
         if (isMultitenant) {
-            request = httpClient.put(endpoint.getPort(), endpoint.getHost(), "/v1/addresses/" + instanceName + "/");
+            request = httpClient.request(httpMethod, endpoint.getPort(), endpoint.getHost(), "/v1/addresses/" + instanceName + "/");
         } else {
-            request = httpClient.put(endpoint.getPort(), endpoint.getHost(), "/v1/addresses/default/");
+            request = httpClient.request(httpMethod, endpoint.getPort(), endpoint.getHost(), "/v1/addresses/default/");
         }
         request.setTimeout(30_000);
         request.putHeader("content-type", "application/json");
