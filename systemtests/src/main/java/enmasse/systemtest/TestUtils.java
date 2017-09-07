@@ -139,6 +139,7 @@ public class TestUtils {
         int expectedPods = openShift.getExpectedPods() + groups.size();
         Logging.log.info("Waiting for " + expectedPods + " pods");
         waitForExpectedPods(openShift, expectedPods, budget);
+        waitForDestinationsReady(apiClient, instanceName, destinations);
     }
 
     public static Future<List<String>> getAddresses(AddressApiClient apiClient, String instanceName, Optional<String> addressName) throws Exception {
@@ -146,6 +147,14 @@ public class TestUtils {
         CompletableFuture<List<String>> listOfAddresses = new CompletableFuture<>();
         listOfAddresses.complete(convertToList(response));
         return listOfAddresses;
+    }
+
+    public static boolean isAddressReady(JsonObject address) {
+        boolean isReady = false;
+        if (address != null) {
+            isReady = address.getJsonObject("status").getBoolean("isReady");
+        }
+        return isReady;
     }
 
     /**
@@ -173,6 +182,33 @@ public class TestUtils {
                 Logging.log.warn("Unspecified kind: " + kind);
         }
         return addresses;
+    }
+
+    /**
+     * wait until destinations isReady parameter is set to true with 1 MINUTE timeout for each destination
+     * @param apiClient instance of AddressApiClient
+     * @param instanceName name of instance
+     * @param destinations variable count of destinations
+     * @throws Exception IlegalStateException if destionation is not ready within timeout
+     */
+    public static void waitForDestinationsReady(AddressApiClient apiClient, String instanceName, Destination... destinations) throws Exception {
+        JsonObject addressObject = null;
+        TimeoutBudget budget = null;
+
+        for (Destination destination : destinations) {
+            boolean isReady = false;
+            budget = new TimeoutBudget(1, TimeUnit.MINUTES);
+            while (budget.timeLeft() >= 0 && !isReady) {
+                addressObject = apiClient.getAddresses(instanceName, Optional.of(destination.getAddress()));
+                isReady = isAddressReady(addressObject);
+                if (!isReady) {
+                    Thread.sleep(2000);
+                }
+            }
+            if (!isReady) {
+                throw new IllegalStateException("Address " + destination.getAddress() + " is not in Ready within timeout.");
+            }
+        }
     }
 
     public static void waitForAddress(OpenShift openShift, String address, TimeoutBudget budget) throws Exception {
