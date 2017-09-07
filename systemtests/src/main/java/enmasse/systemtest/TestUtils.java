@@ -197,12 +197,12 @@ public class TestUtils {
 
         for (Destination destination : destinations) {
             boolean isReady = false;
-            budget = new TimeoutBudget(1, TimeUnit.MINUTES);
+            budget = new TimeoutBudget(3, TimeUnit.MINUTES);
             while (budget.timeLeft() >= 0 && !isReady) {
                 addressObject = apiClient.getAddresses(instanceName, Optional.of(destination.getAddress()));
                 isReady = isAddressReady(addressObject);
                 if (!isReady) {
-                    Thread.sleep(2000);
+                    Thread.sleep(5000);
                 }
             }
             if (!isReady) {

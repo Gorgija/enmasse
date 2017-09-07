@@ -52,6 +52,7 @@ public class QueueTest extends AmqpTestBase {
         runQueueTest(client, q2);
         runQueueTest(client, q3);
     }
+
     @Test
     public void testRestApiForQueue() throws Exception {
         List<String> queues = Arrays.asList("queue1", "queue2");
