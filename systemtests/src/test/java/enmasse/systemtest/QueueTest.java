@@ -54,6 +54,18 @@ public class QueueTest extends AmqpTestBase {
     }
 
     @Test
+    public void testPersistedQueues() throws Exception {
+        Destination q1 = Destination.queue("persistedQueue1", Optional.of("persisted"));
+        Destination q2 = Destination.queue("persistedQueue2", Optional.of("persisted"));
+
+        setAddresses(q1, q2);
+
+        AmqpClient client = createQueueClient();
+        runQueueTest(client, q1);
+        runQueueTest(client, q2);
+    }
+
+    @Test
     public void testRestApiForQueue() throws Exception {
         List<String> queues = Arrays.asList("queue1", "queue2");
         Destination q1 = Destination.queue(queues.get(0), Optional.of("pooled-inmemory"));
