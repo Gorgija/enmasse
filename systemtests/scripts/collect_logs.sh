@@ -1,8 +1,5 @@
 #!/bin/bash
-OC_DIR=$1
 ARTIFACTS_DIR=$2
-
-export PATH="$OC_DIR:$PATH"
 
 function runcmd {
     local cmd=$1

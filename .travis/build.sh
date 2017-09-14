@@ -21,9 +21,7 @@ make docker_tag
 if [ "$TRAVIS_BRANCH" != "master" ] || [ "$TRAVIS_PULL_REQUEST" != "false" ]
 then
     echo "Logging into to local docker registry"
-    oc login -u test -p test --insecure-skip-tls-verify=true https://localhost:8443
     oc new-project enmasseci
-
     docker login -u enmasseci -p `oc whoami -t` 172.30.1.1:5000
 else
     echo "Logging in to Docker Hub"
@@ -34,7 +32,7 @@ echo "Pushing images to Docker Registry"
 make docker_push
 
 echo "Running systemtests"
-./systemtests/scripts/run_test_component.sh templates/install /tmp/openshift systemtests
+./systemtests/scripts/run_test_component.sh templates/install systemtests
 
 echo "Generating bintray artifact descriptor"
 ./.travis/generate-bintray-descriptor.sh enmasse templates/build/enmasse-${VERSION}.tgz > .bintray.json

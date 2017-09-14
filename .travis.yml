@@ -32,7 +32,7 @@ script:
 after_failure:
 - sudo cat /var/log/upstart/docker.log
 - sudo cat /var/lib/docker/image/overlay2/repositories.json | grep ragent
-- "./systemtests/scripts/print_logs.sh /tmp/openshift"
+- ./systemtests/scripts/print_logs.sh
 after_success:
 - "./.travis/push.sh"
 env:
