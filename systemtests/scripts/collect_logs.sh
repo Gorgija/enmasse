@@ -1,5 +1,5 @@
 #!/bin/bash
-ARTIFACTS_DIR=$2
+ARTIFACTS_DIR=$1
 
 function runcmd {
     local cmd=$1
