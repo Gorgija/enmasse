@@ -1,5 +1,4 @@
 #!/bin/sh
-set -x
 set -e
 export VERSION=${TRAVIS_TAG:-latest}
 
@@ -22,11 +21,12 @@ make docker_tag
 if [ "$TRAVIS_BRANCH" != "master" ] || [ "$TRAVIS_PULL_REQUEST" != "false" ]
 then
     echo "Logging into to local docker registry"
+    oc login -u test -p test
     oc new-project enmasseci
     docker login -u enmasseci -p `oc whoami -t` 172.30.1.1:5000
 else
     echo "Logging in to Docker Hub"
-#    docker login -u $DOCKER_USER -p $DOCKER_PASS
+    docker login -u $DOCKER_USER -p $DOCKER_PASS
 fi
 
 echo "Pushing images to Docker Registry"
