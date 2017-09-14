@@ -6,6 +6,9 @@ node('enmasse') {
             sh 'git submodule update --init --recursive'
             sh 'rm -rf artifacts && mkdir -p artifacts'
         }
+        stage ('start openshift') {
+            sh 'oc cluster up'
+        }
         stage ('build') {
             try {
                 withCredentials([string(credentialsId: 'docker-registry-host', variable: 'DOCKER_REGISTRY')]) {
@@ -32,6 +35,9 @@ node('enmasse') {
                     junit '**/TEST-*.xml'
                 }
             }
+        }
+        stage ('stop openshift') {
+            sh 'oc cluster down'
         }
         result = 'success'
     }
