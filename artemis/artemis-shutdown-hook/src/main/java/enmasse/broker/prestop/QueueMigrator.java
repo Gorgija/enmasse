@@ -65,8 +65,14 @@ public class QueueMigrator implements Callable<QueueMigrator> {
         protonClient.connect(protonClientOptions, endpoint.hostname(), endpoint.port(), connection -> {
             if (connection.succeeded()) {
                 ProtonConnection conn = connection.result();
+                conn.disconnectHandler(result -> {
+                    log.info("Migrator receiver connection for {} disconnected", queueInfo);
+                    conn.close();
+                });
                 conn.closeHandler(result -> {
-                    log.info("Migrator connection for {} closed", queueInfo);
+                    conn.close();
+                    conn.disconnect();
+                    log.info("Migrator receiver connection for {} closed", queueInfo);
                 });
                 conn.openHandler(result -> {
                     Source source = new Source();
@@ -102,8 +108,14 @@ public class QueueMigrator implements Callable<QueueMigrator> {
                 log.info("Opened connection to destination broker for {}", queueInfo);
                 ProtonConnection toConn = toConnection.result();
                 toConn.setContainer("topic-migrator");
+                toConn.disconnectHandler(result -> {
+                    log.info("Migrator sender connection for {} disconnected ", queueInfo);
+                    toConn.close();
+                });
                 toConn.closeHandler(result -> {
-                    log.info("Migrator connection for {} closed", queueInfo);
+                    toConn.close();
+                    toConn.disconnect();
+                    log.info("Migrator sender connection for {} closed", queueInfo);
                 });
                 toConn.openHandler(toResult -> {
                     Target target = new Target();
