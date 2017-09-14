@@ -10,4 +10,9 @@ test:
 
 package:
 	gradle build
+
+clean_java:
+	gradle clean
+
+clean: clean_java
 endif

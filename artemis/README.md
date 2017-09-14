@@ -12,8 +12,4 @@ This repository contains
 ## Build instructions
 
     git submodule update --init
-    gradle build buildTar downloadArtemis
-
-    docker build -t enmasseproject/artemis .
-
-
+    make
