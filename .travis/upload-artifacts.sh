@@ -23,7 +23,7 @@ function upload_file() {
 function upload_folder() {
     local folder=$1
     local target=$2
-    for i in `find $folder`
+    for i in `find $folder -type f`
     do
         base=`basename $i`
         upload_file $i $target/$base
@@ -31,7 +31,7 @@ function upload_folder() {
 }
 
 if [ "$SUCCESS" == "true" ]; then
-    upload_file templates/build/enmasse-${VERSION}.tgz .
+    upload_file templates/build/enmasse-${VERSION}.tgz enmasse-${VERSION}.tgz
 else
     echo "Collecting test reports"
     
@@ -41,6 +41,8 @@ else
         cp $i target/surefire-reports
     done
     mvn surefire-report:report-only
+
+    upload_file templates/build/enmasse-${VERSION}.tgz $TRAVIS_BUILD_NUMBER/enmasse-${VERSION}.tgz
+    upload_file target/site/surefire-report.html $TRAVIS_BUILD_NUMBER/test-reports/surefire-report.html
     upload_folder target/surefire-reports $TRAVIS_BUILD_NUMBER/test-reports
-    upload_file target/site/surefire-report.html $TRAVIS_BUILD_NUMBER/test-reports
 fi
