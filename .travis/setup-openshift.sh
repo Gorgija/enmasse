@@ -41,8 +41,13 @@ sleep 30
 
 KUBECONFIG=$CONFIG/master/admin.kubeconfig
 
+oc whoami
+oc create serviceaccount enmasse-account
+oadm policy add-cluster-role-to-user cluster-admin enmasse-acount
+oc login -u enmasse-account -p enmasse-account
+oc whoami
+
 # Deploy HAProxy router
-oc whoami -t
 oc adm --config $KUBECONFIG policy add-scc-to-user hostnetwork system:serviceaccount:default:router
 oc adm --config $KUBECONFIG policy add-cluster-role-to-user cluster-reader system:serviceaccount:default:router
 oc adm --config $KUBECONFIG router
