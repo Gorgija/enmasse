@@ -44,6 +44,7 @@ if [ "$SUCCESS" == "true" ]; then
     do
         cp $i artifacts/test-reports
     done
+    tar -czf artifacts/test-reports.tgz artifacts/test-reports
 
     upload_file templates/build/enmasse-${VERSION}.tgz $TRAVIS_BUILD_NUMBER/enmasse-${VERSION}.tgz
     upload_folder artifacts $TRAVIS_BUILD_NUMBER/artifacts
