@@ -42,6 +42,7 @@ sleep 30
 KUBECONFIG=$CONFIG/master/admin.kubeconfig
 
 # Deploy HAProxy router
+oc whoami -t
 oc adm --config $KUBECONFIG policy add-scc-to-user hostnetwork system:serviceaccount:default:router
 oc adm --config $KUBECONFIG policy add-cluster-role-to-user cluster-reader system:serviceaccount:default:router
 oc adm --config $KUBECONFIG router
