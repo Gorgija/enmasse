@@ -49,4 +49,6 @@ else
     upload_file templates/build/enmasse-${VERSION}.tgz $TRAVIS_BUILD_NUMBER/enmasse-${VERSION}.tgz
     upload_file target/site/surefire-report.html $TRAVIS_BUILD_NUMBER/test-reports/surefire-report.html
     upload_folder target/surefire-reports $TRAVIS_BUILD_NUMBER/test-reports
+    upload_folder target/surefire-reports $TRAVIS_BUILD_NUMBER/test-reports
+    upload_folder artifacts $TRAVIS_BUILD_NUMBER/artifacts
 fi
