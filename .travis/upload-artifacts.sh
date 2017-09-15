@@ -18,7 +18,7 @@ function upload_file() {
     local target=$2
     if [ -f $file ]; then
         echo "curl -T $file -u${BINTRAY_API_USER}:${BINTRAY_API_TOKEN} -H 'X-Bintray-Package:${PACKAGE}' -H 'X-Bintray-Version:${VERSION}' https://api.bintray.com/content/enmasse/snapshots/$target"
-        curl -T $file -u${BINTRAY_API_USER}:${BINTRAY_API_TOKEN} -H "X-Bintray-Package:${PACKAGE}" -H "X-Bintray-Version:${VERSION}" https://api.bintray.com/content/enmasse/snapshots/$target;publish=1;override=1
+        curl -T $file -u${BINTRAY_API_USER}:${BINTRAY_API_TOKEN} -H "X-Bintray-Package:${PACKAGE}" -H "X-Bintray-Version:${VERSION}" -H "X-Bintray-Publish: 1" -H "X-Bintray-Override: 1" https://api.bintray.com/content/enmasse/snapshots/$target
     else
         echo "Skipping $file, not found"
     fi
@@ -39,16 +39,12 @@ if [ "$SUCCESS" == "true" ]; then
 else
     echo "Collecting test reports"
     
-    mkdir -p target/surefire-reports
+    mkdir -p artifacts/test-reports
     for i in `find . -name "TEST-*.xml"`
     do
-        cp $i target/surefire-reports
+        cp $i artifacts/test-reports
     done
-    mvn surefire-report:report-only
 
     upload_file templates/build/enmasse-${VERSION}.tgz $TRAVIS_BUILD_NUMBER/enmasse-${VERSION}.tgz
-    upload_file target/site/surefire-report.html $TRAVIS_BUILD_NUMBER/test-reports/surefire-report.html
-    upload_folder target/surefire-reports $TRAVIS_BUILD_NUMBER/test-reports
-    upload_folder target/surefire-reports $TRAVIS_BUILD_NUMBER/test-reports
     upload_folder artifacts $TRAVIS_BUILD_NUMBER/artifacts
 fi
