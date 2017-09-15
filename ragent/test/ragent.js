@@ -437,7 +437,7 @@ describe('address source subscription', function() {
     var routers = new RouterList();
 
     beforeEach(function(done) {
-        address_source.listen(8888).on('listening', function () {
+        address_source.listen(8889).on('listening', function () {
             done();
         });
     });
