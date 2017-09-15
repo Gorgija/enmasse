@@ -37,14 +37,6 @@ make
 #echo "Running systemtests"
 #./systemtests/scripts/run_test_component.sh templates/install /tmp/openshift systemtests
 #
-#echo "Collecting test reports"
-#
-#mkdir -p target/surefire-reports
-#for i in `find . -name "TEST-*.xml"`
-#do
-#    cp $i target/surefire-reports
-#done
-#mvn surefire-report:report-only
 #
 #echo "Generating bintray artifact descriptor"
 #./.travis/upload-artifacts.sh

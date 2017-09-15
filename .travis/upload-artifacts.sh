@@ -33,6 +33,14 @@ function upload_folder() {
 if [ "$SUCCESS" == "true" ]; then
     upload_file templates/build/enmasse-${VERSION}.tgz .
 else
+    echo "Collecting test reports"
+    
+    mkdir -p target/surefire-reports
+    for i in `find . -name "TEST-*.xml"`
+    do
+        cp $i target/surefire-reports
+    done
+    mvn surefire-report:report-only
     upload_folder target/surefire-reports $TRAVIS_BUILD_NUMBER/test-reports
     upload_file target/site/surefire-report.html $TRAVIS_BUILD_NUMBER/test-reports
 fi
