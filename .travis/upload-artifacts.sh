@@ -18,7 +18,7 @@ function upload_file() {
     local target=$2
     if [ -f $file ]; then
         echo "curl -T $file -u${BINTRAY_API_USER}:${BINTRAY_API_TOKEN} -H 'X-Bintray-Package:${PACKAGE}' -H 'X-Bintray-Version:${VERSION}' https://api.bintray.com/content/enmasse/snapshots/$target"
-        curl -T $file -u${BINTRAY_API_USER}:${BINTRAY_API_TOKEN} -H "X-Bintray-Package:${PACKAGE}" -H "X-Bintray-Version:${VERSION}" https://api.bintray.com/content/enmasse/snapshots/$target
+        curl -T $file -u${BINTRAY_API_USER}:${BINTRAY_API_TOKEN} -H "X-Bintray-Package:${PACKAGE}" -H "X-Bintray-Version:${VERSION}" https://api.bintray.com/content/enmasse/snapshots/$target;publish=1;override=1
     else
         echo "Skipping $file, not found"
     fi
