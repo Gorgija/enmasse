@@ -16,8 +16,12 @@ fi
 function upload_file() {
     local file=$1
     local target=$2
-    echo "curl -T $file -u${BINTRAY_API_USER}:${BINTRAY_API_TOKEN} -H 'X-Bintray-Package:${PACKAGE}' -H 'X-Bintray-Version:${VERSION}' https://api.bintray.com/content/enmasse/snapshots/$target"
-    curl -T $file -u${BINTRAY_API_USER}:${BINTRAY_API_TOKEN} -H "X-Bintray-Package:${PACKAGE}" -H "X-Bintray-Version:${VERSION}" https://api.bintray.com/content/enmasse/snapshots/$target
+    if [ -f $file ]; then
+        echo "curl -T $file -u${BINTRAY_API_USER}:${BINTRAY_API_TOKEN} -H 'X-Bintray-Package:${PACKAGE}' -H 'X-Bintray-Version:${VERSION}' https://api.bintray.com/content/enmasse/snapshots/$target"
+        curl -T $file -u${BINTRAY_API_USER}:${BINTRAY_API_TOKEN} -H "X-Bintray-Package:${PACKAGE}" -H "X-Bintray-Version:${VERSION}" https://api.bintray.com/content/enmasse/snapshots/$target
+    else
+        echo "Skipping $file, not found"
+    fi
 }
 
 function upload_folder() {
@@ -26,7 +30,7 @@ function upload_folder() {
     for i in `find $folder -type f`
     do
         base=`basename $i`
-        upload_file $i $target/$base
+        upload_file $i "$target/$base"
     done
 }
 
