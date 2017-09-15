@@ -35,8 +35,8 @@ function upload_folder() {
 }
 
 if [ "$SUCCESS" == "true" ]; then
-    upload_file templates/build/enmasse-${VERSION}.tgz enmasse-${VERSION}.tgz
-else
+#    upload_file templates/build/enmasse-${VERSION}.tgz enmasse-${VERSION}.tgz
+#else
     echo "Collecting test reports"
     
     mkdir -p artifacts/test-reports
